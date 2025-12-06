@@ -26,21 +26,17 @@ export def zst [
 
   let actual_level = level zstd $level
   #let actual_long = if $long != null { "--long" } else { "" }
-  let actual_threads = if $threads != null {
-    $threads | into int
-  } else {
-    ((sys cpu | length) * 0.75) | math ceil
-  }
+  let threads = get-threads $threads
 
-  let name = $"($directory | path basename).tar.zst"
-  let active_dir = ($directory | path dirname | path expand)
   let input_name = ($directory | path basename)
+  let name = $input_name + ".tar.zst"
+  let active_dir = ($directory | path dirname | path expand)
 
   do {
     cd $active_dir
 
     $env.ZSTD_CLEVEL = $actual_level
-    $env.ZSTD_NBTHREADS = $actual_threads
+    $env.ZSTD_NBTHREADS = $threads
     tar -I zstd -cf $name $input_name
   }
 
@@ -52,12 +48,42 @@ export def zst [
   return $out_path
 }
 
+# Compress a directory to a tar archive with zstd.
+#
+# Returns the relative path to the created archive.
+@example "Simple" { compress dir bz3 foo/bar/ } --result "./foo/bar.tar.bz3"
+export def bz3 [
+  --threads(-t): int@"nu-complete thread-count"
+  # bzip3 compression threads.
+  # Defaults to 75% of available threads
+  directory: path
+  # Path of directory to compress.
+]: nothing -> path {
+  if ($directory | path type) != "dir" {
+    error input "Is not a directory" --metadata (metadata $directory)
+  }
 
-# Placeholder for bzip3 compression of directories
-# export def bz3 [
-# ]: nothing -> error {
-#   error make { msg: "bzip3 directory compression is not yet implemented." }
-# }
+  let threads = get-threads $threads
+
+  let input_name = ($directory | path basename)
+  let name = $input_name + ".tar.bz3"
+
+  let active_dir = ($directory | path dirname | path expand)
+  do {
+    cd $active_dir
+
+    # let bz3_cmd = $"bzip3 -z --jobs=($threads)"
+    tar -I bzip3 -cf $name $input_name
+  }
+
+  let out_path = $active_dir | path join $name
+  let diff = diff paths $directory $out_path
+
+  # TODO: add --silent flag
+  print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute))"
+
+  return $out_path
+}
 
 
 # Placeholder for bzip2 compression of directories
