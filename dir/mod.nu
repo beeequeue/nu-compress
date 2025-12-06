@@ -1,4 +1,6 @@
-use ../utils.nu ['nu-complete level zstd' 'nu-complete thread-count']
+use ../utils/input.nu *
+use ../utils/size.nu *
+use ../utils/zstd.nu *
 
 # TODO: compress dir gz
 
