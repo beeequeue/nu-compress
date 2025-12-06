@@ -26,14 +26,10 @@ export def zst [
     error input "Is not a file" --metadata (metadata $file)
   }
 
-  # paths
-  let input_name = $file | path basename
-  let output_name = $input_name + ".zst"
-  let active_dir = $file | path dirname
-  let out_path = $active_dir | path join $output_name
-
-  if not $force and ($out_path | path exists) {
-    error input $"Output file already exists \(($output_name))" --metadata (metadata $file)
+  let paths = if $force {
+    get-and-check-paths $file ".zst" -f -m (metadata $file)
+  } else {
+    get-and-check-paths $file ".zst" -m (metadata $file)
   }
 
   # options
@@ -42,16 +38,16 @@ export def zst [
   let threads = get-threads $threads
 
   do {
-    cd $active_dir
+    cd $paths.active_dir
 
     $env.ZSTD_CLEVEL = $level
     $env.ZSTD_NBTHREADS = $threads
-    zstd --force --quiet $input_name -o $output_name
+    zstd --force --quiet $paths.input_name -o $paths.output_name
   }
 
-  let diff = diff paths $file $out_path
+  let diff = diff paths $file $paths.out_path
 
   print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute))"
 
-  return $out_path
+  return $paths.out_path
 }
