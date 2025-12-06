@@ -24,23 +24,23 @@ export def zst [
     error input "Is not a directory" --metadata (metadata $directory)
   }
 
-  let actual_level = level zstd $level
+  let level = level zstd $level
   #let actual_long = if $long != null { "--long" } else { "" }
   let threads = get-threads $threads
 
   let input_name = ($directory | path basename)
-  let name = $input_name + ".tar.zst"
+  let output_name = $input_name + ".tar.zst"
   let active_dir = ($directory | path dirname | path expand)
 
   do {
     cd $active_dir
 
-    $env.ZSTD_CLEVEL = $actual_level
+    $env.ZSTD_CLEVEL = $level
     $env.ZSTD_NBTHREADS = $threads
-    tar -I zstd -cf $name $input_name
+    tar -I zstd -cf $output_name $input_name
   }
 
-  let out_path = $active_dir | path join $name
+  let out_path = $active_dir | path join $output_name
   let diff = diff paths $directory $out_path
 
   print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute))"
@@ -66,17 +66,17 @@ export def bz3 [
   let threads = get-threads $threads
 
   let input_name = ($directory | path basename)
-  let name = $input_name + ".tar.bz3"
+  let output_name = $input_name + ".tar.bz3"
 
   let active_dir = ($directory | path dirname | path expand)
   do {
     cd $active_dir
 
     # let bz3_cmd = $"bzip3 -z --jobs=($threads)"
-    tar -I bzip3 -cf $name $input_name
+    tar -I bzip3 -cf $output_name $input_name
   }
 
-  let out_path = $active_dir | path join $name
+  let out_path = $active_dir | path join $output_name
   let diff = diff paths $directory $out_path
 
   # TODO: add --silent flag
