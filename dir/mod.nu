@@ -1,0 +1,56 @@
+use ../utils.nu ['nu-complete level zstd' 'nu-complete thread-count']
+
+# TODO: compress dir gz
+
+# Compress a directory to a tar archive with zstd.
+#
+# Returns the relative path to the created archive.
+@example "Simple" { compress dir zst foo/bar/ } --result "./foo/bar.tar.zst"
+@example "Custom level" { compress dir zst -l max foo/bar/ } --result "./foo/bar.tar.zst"
+export def zst [
+  --level(-l): string@"nu-complete level zstd" = "normal"
+  # zstd level: fast (3), normal (12), slow (17), max(19).
+  # Defaults to normal
+  --long(-L)
+  # Use zstd long distance matching. May improve compression ratio for large (4MB+) files.
+  --threads(-t): int@"nu-complete thread-count"
+  # zstd compression threads.
+  # Defaults to 75% of available threads
+  directory: path
+  # Path of directory to compress.
+]: nothing -> path {
+  if ($directory | path type) != "dir" {
+    error make { msg: "Path is not a directory" }
+  }
+
+  let actual_level = level zstd $level
+  #let actual_long = if $long != null { "--long" } else { "" }
+  let actual_threads = if $threads != null {
+    $threads | into int
+  } else {
+    ((sys cpu | length) * 0.75) | math ceil
+  }
+
+  let name: string = $"($directory | path basename).tar.zst"
+  let active_dir = ($directory | path dirname | path expand)
+  let input_name = ($directory | path basename)
+
+  do {
+    cd $active_dir
+
+    $env.ZSTD_CLEVEL = $actual_level
+    $env.ZSTD_NBTHREADS = $actual_threads
+    tar -I zstd -cf $name $input_name
+  }
+
+  let out_path = $active_dir | path join $name
+  let diff = diff paths $directory $out_path
+
+  print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute))"
+
+  return $out_path
+}
+export alias zstd = zst
+
+# TODO: compress dir bzip2
+# TODO: compress dir bzip3
