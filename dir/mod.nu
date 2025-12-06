@@ -34,7 +34,7 @@ export def zst [
     ((sys cpu | length) * 0.75) | math ceil
   }
 
-  let name: string = $"($directory | path basename).tar.zst"
+  let name = $"($directory | path basename).tar.zst"
   let active_dir = ($directory | path dirname | path expand)
   let input_name = ($directory | path basename)
 

@@ -21,7 +21,7 @@ export def "level zstd" [
   --slow: int = 17
   --max: int = 19
   input: string
-] {
+]: nothing -> int {
   match $input {
     "fast" => $fast
     "normal" => $normal
