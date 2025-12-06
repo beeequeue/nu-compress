@@ -1,3 +1,4 @@
+use ../utils/error.nu *
 use ../utils/input.nu *
 use ../utils/size.nu *
 use ../utils/zstd.nu *
@@ -22,10 +23,7 @@ export def zst [
   # Path of directory to compress.
 ]: nothing -> path {
   if ($directory | path type) != "dir" {
-    error make {
-      msg: "Invalid input",
-      label: { ...(metadata $directory), text: $"Is not a directory: ($directory)" }
-    }
+    error input "Is not a directory" --metadata (metadata $directory)
   }
 
   let actual_level = level zstd $level
