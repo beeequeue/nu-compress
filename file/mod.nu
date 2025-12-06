@@ -45,9 +45,9 @@ export def zst [
     zstd --force --quiet $paths.input_name -o $paths.output_name
   }
 
-  let diff = diff paths $file $paths.out_path
+  let diff = diff paths $file $paths.output_path
 
   print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute))"
 
-  return $paths.out_path
+  return $paths.output_path
 }
