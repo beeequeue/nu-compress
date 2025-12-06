@@ -22,7 +22,10 @@ export def zst [
   # Path of directory to compress.
 ]: nothing -> path {
   if ($directory | path type) != "dir" {
-    error make { msg: "Path is not a directory" }
+    error make {
+      msg: "Invalid input",
+      label: { ...(metadata $directory), text: $"Is not a directory: ($directory)" }
+    }
   }
 
   let actual_level = level zstd $level
