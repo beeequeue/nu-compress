@@ -3,8 +3,6 @@ use ../utils/input.nu *
 use ../utils/size.nu *
 use ../utils/zstd.nu *
 
-# TODO: compress dir gz
-
 # Compress a directory to a tar archive with zstd.
 #
 # Returns the relative path to the created archive.
@@ -53,7 +51,24 @@ export def zst [
 
   return $out_path
 }
-export alias zstd = zst
 
-# TODO: compress dir bzip2
-# TODO: compress dir bzip3
+
+# Placeholder for bzip3 compression of directories
+# export def bz3 [
+# ]: nothing -> error {
+#   error make { msg: "bzip3 directory compression is not yet implemented." }
+# }
+
+
+# Placeholder for bzip2 compression of directories
+# export def bz2 [
+# ]: nothing -> error {
+#   error make { msg: "bzip2 directory compression is not yet implemented." }
+# }
+
+
+# Placeholder for gzip compression of directories
+# export def gz [
+# ]: nothing -> error {
+#   error make { msg: "gzip directory compression is not yet implemented." }
+# }
