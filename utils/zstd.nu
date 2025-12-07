@@ -16,10 +16,10 @@ export def "nu-complete level zstd" [] {
 }
 
 export def "level zstd" [
-  --fast: int = 3
-  --normal: int = 12
-  --slow: int = 17
-  --max: int = 19
+  --fast: int = $zstd_levels.fast
+  --normal: int = $zstd_levels.normal
+  --slow: int = $zstd_levels.slow
+  --max: int = $zstd_levels.max
   input: string
 ]: nothing -> int {
   match $input {

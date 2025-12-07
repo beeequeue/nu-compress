@@ -9,14 +9,14 @@
 export def "diff paths" [
   before: path
   after: path
-]: nothing -> record<before: filesize, after: filesize, absolute: filesize,relative: float,percent: string> {
+] {
   let before_size = ls -dt $before | math sum | get size
   let after_size = ls -dt $after | math sum | get size
 
  return {
-  before: $before_size
-  after: $after_size
-  ...(diff filesize $before_size $after_size)
+   before: $before_size
+   after: $after_size
+   ...(diff filesize $before_size $after_size)
  }
 }
 
@@ -25,7 +25,7 @@ export def "diff paths" [
 export def "diff filesize" [
   before: filesize
   after: filesize
-]: nothing -> record<absolute: filesize,relative: float,percent: string> {
+] {
   let diff = ($before - $after) * -1
   let relative = $diff / $before
 
