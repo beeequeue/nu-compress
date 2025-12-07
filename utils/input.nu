@@ -1,5 +1,39 @@
 use ../utils/error.nu *
 
+# Removes the extension from a path.
+export def filename [input: path]: nothing -> path {
+  $input | path parse | get stem
+}
+
+export def get-and-check-paths [
+  path: path
+  suffix: string
+  --rm-ext
+  --metadata(-m): record<span: any>
+  --force(-f)
+  # Overwrite existing output file if it exists.
+] {
+  let input_name = $path | path basename
+  let output_name = if $rm_ext {
+    $input_name | (filename $in) + $suffix
+  } else {
+    $input_name + $suffix
+  }
+  let active_dir = $path | path dirname
+  let output_path = $active_dir | path join $output_name
+
+  if not $force and ($output_path | path exists) {
+    error input $"Output file already exists \(($output_name))" --hm "Use -f to overwrite" --metadata $metadata
+  }
+
+  return {
+    input_name: $input_name,
+    output_name: $output_name,
+    active_dir: $active_dir,
+    output_path: $output_path,
+  }
+}
+
 export def "nu-complete thread-count" [--min: int, --max: int] {
   let cpu_count = sys cpu | length
   let actual_min = [1 (if $min != null { $min } else { 1 })] | math max
@@ -30,28 +64,4 @@ export def get-threads [
   )
 
   return ([1, $input] | math max | [$cpu_count, $in] | math min)
-}
-
-export def get-and-check-paths [
-  path: path
-  suffix: string
-  --metadata(-m): record<span: any>
-  --force(-f)
-  # Overwrite existing output file if it exists.
-] {
-  let input_name = $path | path basename
-  let output_name = $input_name + $suffix
-  let active_dir = $path | path dirname
-  let output_path = $active_dir | path join $output_name
-
-  if not $force and ($output_path | path exists) {
-    error input $"Output file already exists \(($output_name))" --hm "Use -f to overwrite" --metadata $metadata
-  }
-
-  return {
-    input_name: $input_name,
-    output_name: $output_name,
-    active_dir: $active_dir,
-    output_path: $output_path,
-  }
 }
