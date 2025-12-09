@@ -16,6 +16,32 @@ export def "nu-complete level av1" [] {
   }
 }
 
+export def "level av1" [
+  --smallest: int = $av1_level.smallest
+  --small: int = $av1_level.small
+  --average: int = $av1_level.average
+  --better: int = $av1_level.better
+  --best: int = $av1_level.best
+  input: string
+]: nothing -> int {
+  match $input {
+    "smallest" => $smallest
+    "small" => $small
+    "average" => $average
+    "better" => $better
+    "best" => $best
+    _ => (
+      error make {
+        msg: $"Invalid av1 compression level: ($input)."
+        label: {
+          ...(metadata $input)
+          text: $"Got ($input), expected one of: ($av1_level | columns | str join ', ')."
+        }
+      }
+    )
+  }
+}
+
 
 export const av1_speed = {
   veryfast: 10,

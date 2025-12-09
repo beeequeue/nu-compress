@@ -39,6 +39,7 @@ export def av1 [
   if ($file_metadatas | is-empty) { return }
 
   # options
+  let level = level av1 $level
   let preset = preset av1 $preset
   let threads = get-threads $threads
   let force = if $force { "-y" } else { "" }
@@ -48,7 +49,7 @@ export def av1 [
     $env.SVT_LOG = 1
 
     $file_metadatas | each {|paths|
-      null | ffmpeg -v error $force -threads $threads -i $paths.input_name -c:v libsvtav1 -svtav1-params "avif=1" -crf 18 -preset $preset $paths.output_name
+      null | ffmpeg -v error $force -threads $threads -i $paths.input_name -c:v libsvtav1 -svtav1-params "avif=1" -crf $level -preset $preset $paths.output_name
 
       let diff = diff paths $paths.input_name $paths.output_path
       print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute)) | ($paths.output_name)"
