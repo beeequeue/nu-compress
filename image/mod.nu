@@ -19,18 +19,24 @@ export def av1 [
   --threads(-t): int@"nu-complete thread-count"
   # ffmpeg threads.
   # Defaults to 75% of available threads
-  file: path
+  files: glob
   # Path of file to compress.
-]: nothing -> path {
-  if ($file | path type) != "file" {
-    error input "Is not a file" --metadata (metadata $file)
+]: nothing -> nothing {
+  let files = glob $files
+  for file_path in $files {
+    if ($file_path | path type) != "file" {
+      error input "Is not a file" --metadata (metadata $file_path)
+    }
   }
 
-  let paths = if $force {
-    get-and-check-paths $file ".avif" --rm-ext -f -m (metadata $file)
-  } else {
-    get-and-check-paths $file ".avif" --rm-ext -m (metadata $file)
-  }
+  let file_metadatas = (
+    $files | par-each -k {|file|
+      $file
+      | path relative-to $env.PWD
+      get-and-check-paths $in ".avif" --rm-ext --force=$force -m (metadata $in)
+    }
+  )
+  if ($file_metadatas | is-empty) { return }
 
   # options
   let preset = preset av1 $preset
@@ -38,15 +44,16 @@ export def av1 [
   let force = if $force { "-y" } else { "" }
 
   do {
-    cd $paths.active_dir
-
+    cd $file_metadatas.0.active_dir
     $env.SVT_LOG = 1
-    null | ffmpeg -v error $force -threads $threads -i $paths.input_name -c:v libsvtav1 -svtav1-params "avif=1" -crf 18 -preset $preset $paths.output_name
+
+    $file_metadatas | each {|paths|
+      null | ffmpeg -v error $force -threads $threads -i $paths.input_name -c:v libsvtav1 -svtav1-params "avif=1" -crf 18 -preset $preset $paths.output_name
+
+      let diff = diff paths $paths.input_name $paths.output_path
+      print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute)) | ($paths.output_name)"
+    }
   }
 
-  let diff = diff paths $file $paths.output_path
-
-  print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute))"
-
-  return $paths.output_path
+  return
 }
