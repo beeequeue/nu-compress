@@ -7,7 +7,7 @@ use ../utils/zstd.nu *
 #
 # Returns the relative path to the created archive.
 @example "Simple" { compress file zst foo.txt } --result "./foo.txt.zst"
-@example "Custom level" { compress file zst -l max foo/bar.txt } --result "./foo/bar.txt.zst"
+@example "Custom level" { compress file zst -l max foo/bar.tar } --result "./foo/bar.tar.zst"
 export def zst [
   --force(-f)
   # Overwrite existing output file if it exists.
@@ -43,6 +43,43 @@ export def zst [
     $env.ZSTD_CLEVEL = $level
     $env.ZSTD_NBTHREADS = $threads
     zstd --force --quiet $paths.input_name -o $paths.output_name
+  }
+
+  let diff = diff paths $file $paths.output_path
+
+  print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute))"
+
+  return $paths.output_path
+}
+
+# Compress a file to a tar archive with bzip3.
+#
+# Returns the relative path to the created archive.
+@example "Custom level" { compress file bz3 foo/bar.tar } --result "./foo/bar.tar.bz3"
+export def bz3 [
+  --force(-f)
+  --threads(-t): int@"nu-complete thread-count"
+  # bzip3 compression threads.
+  # Defaults to 75% of available threads
+  file: path
+  # Path of file to compress.
+]: nothing -> path {
+  if ($file | path type) != "file" {
+    error input "Is not a file" --metadata (metadata $file)
+  }
+
+  let paths = if $force {
+    get-and-check-paths $file ".bz3" -f -m (metadata $file)
+  } else {
+    get-and-check-paths $file ".bz3" -m (metadata $file)
+  }
+
+  let threads = get-threads $threads
+
+  do {
+    cd $paths.active_dir
+
+    tar -I bzip3 -cf $paths.output_name $paths.input_name
   }
 
   let diff = diff paths $file $paths.output_path
