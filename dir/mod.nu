@@ -7,12 +7,12 @@ use ../utils/zstd.nu *
 #
 # Returns the relative path to the created archive.
 @example "Simple" { compress dir zst foo/bar/ } --result "./foo/bar.tar.zst"
-@example "Custom level" { compress dir zst -l max foo/bar/ } --result "./foo/bar.tar.zst"
+@example "Custom effort" { compress dir zst -l max foo/bar/ } --result "./foo/bar.tar.zst"
 export def zst [
   --force(-f)
   # Overwrite existing output file if it exists.
-  --level(-l): string@"nu-complete level zstd" = "normal"
-  # zstd level: fast (3), normal (12), slow (17), max(19).
+  --effort(-e): string@"nu-complete effort zstd" = "normal"
+  # zstd effort: fast (3), normal (12), slow (17), max(19).
   # Defaults to normal
   --long(-L)
   # Use zstd long distance matching. May improve compression ratio for large (4MB+) files.
@@ -33,14 +33,14 @@ export def zst [
   }
 
   # options
-  let level = level zstd $level
+  let effort = effort zstd $effort
   #let actual_long = if $long != null { "--long" } else { "" }
   let threads = get-threads $threads
 
   do {
     cd $paths.active_dir
 
-    $env.ZSTD_CLEVEL = $level
+    $env.ZSTD_CLEVEL = $effort
     $env.ZSTD_NBTHREADS = $threads
     tar -I zstd -cf $paths.output_name $paths.input_name
   }

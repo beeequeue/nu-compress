@@ -63,10 +63,9 @@ compress dir bz3 --help
 ## Todo
 
 - [ ] standardize options
-  - [ ] compression effort (`--preset`, `--level`) -> `--effort`
-  - [ ] quality (`--level`) -> `--quality`
-  - [ ] add `--lossless` to where valid
-    - [ ] av1
+  - [x] compression effort (`--preset`, `--level`) -> `--effort`
+  - [x] quality (`--level`) -> `--quality`
+  - [x] add `--lossless` to where valid
     - [x] webp
   - [ ] make every command accept multiple files
 - [ ] more commands

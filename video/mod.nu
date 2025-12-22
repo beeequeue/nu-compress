@@ -8,15 +8,15 @@ use ../utils/video.nu *
 #
 # Returns the relative path to the created archive.
 @example "Simple" { compress video av1 video.mp4 } --result "./video.mkv"
-@example "Custom preset" { compress video av1 -c mp4 -l max foo/bar.mp4 } --result "./foo/bar.mp4"
+@example "Custom container" { compress video av1 -c mp4 -l max foo/bar.mp4 } --result "./foo/bar.mp4"
 export def av1 [
   --force(-f)
   # Overwrite existing output file if it exists.
-  --level(-l): string@"nu-complete level av1" = "average"
-  # av1 quality level: smallest (40), small (30), average (20), better (15), best (8).
+  --quality(-q): string@"nu-complete quality av1" = "average"
+  # av1 quality: smallest (40), small (30), average (20), better (15), best (8).
   # Defaults to average.
-  --preset(-p): string@"nu-complete preset av1" = "max"
-  # av1 speed preset: veryfast (10), fast (8), normal (4), slow (2), max(1).
+  --effort(-e): string@"nu-complete effort av1" = "max"
+  # av1 speed effort: veryfast (10), fast (8), normal (4), slow (2), max(1).
   # Defaults to normal.
   --container(-c): string@"nu-complete video container" = "mkv"
   # Container to store the audiovisual data in.
@@ -44,8 +44,8 @@ export def av1 [
   if ($file_metadatas | is-empty) { return }
 
   # options
-  let level = level av1 $level
-  let preset = preset av1 $preset
+  let quality = quality av1 $quality
+  let effort = effort av1 $effort
   let threads = get-threads $threads
   let force = if $force { "-y" } else { "" }
 
@@ -54,7 +54,17 @@ export def av1 [
     $env.SVT_LOG = 1
 
     $file_metadatas | each {|paths|
-      null | ffmpeg -hide_banner -v info $force -threads $threads -i $paths.input_name -c:v libsvtav1 -crf $level -preset $preset $paths.output_name
+      let flags: list<string> = []
+      | add-flag "-hide_banner" true
+      | add-flag "-v" "info"
+      | add-flag "-y" $force
+      | add-flag "-threads" $threads
+      | add-flag "-i" $paths.input_name
+      | add-flag "-c:v" "libsvtav1"
+      | add-flag "-preset" $effort
+      | add-flag "-crf" $quality
+
+      null | ffmpeg ...$flags $paths.output_name
 
       let diff = diff paths $paths.input_name $paths.output_path
       print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute)) | ($paths.output_name)"
