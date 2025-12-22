@@ -59,3 +59,33 @@ compress dir zst --help
 ```nushell
 compress dir bz3 --help
 ```
+
+## Todo
+
+- [ ] standardize options
+  - [ ] compression effort (`--preset`, `--level`) -> `--effort`
+  - [ ] quality (`--level`) -> `--quality`
+  - [ ] add `--lossless` to where valid
+    - [ ] av1
+    - [ ] webp
+  - [ ] make every command accept multiple files
+- [ ] more commands
+  - [ ] files/dirs
+    - [x] zstd
+    - [x] bzip3
+    - [ ] bzip2
+    - [ ] gzip
+  - [ ] images
+    - [x] av1
+    - [ ] webp
+    - [ ] jpegxl
+    - [ ] png
+    - [ ] jpeg
+  - [ ] videos
+    - [x] av1
+    - [ ] h265
+    - [ ] h264
+  - [ ] audio?
+    - [ ] ogg?
+    - [ ] something else?
+    - [ ] mp3?
