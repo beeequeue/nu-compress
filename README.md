@@ -67,7 +67,7 @@ compress dir bz3 --help
   - [ ] quality (`--level`) -> `--quality`
   - [ ] add `--lossless` to where valid
     - [ ] av1
-    - [ ] webp
+    - [x] webp
   - [ ] make every command accept multiple files
 - [ ] more commands
   - [ ] files/dirs
@@ -77,7 +77,7 @@ compress dir bz3 --help
     - [ ] gzip
   - [ ] images
     - [x] av1
-    - [ ] webp
+    - [x] webp
     - [ ] jpegxl
     - [ ] png
     - [ ] jpeg
