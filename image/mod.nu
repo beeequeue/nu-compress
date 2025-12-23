@@ -27,16 +27,12 @@ export def av1 [
   let files = glob $files
   for file_path in $files {
     if ($file_path | path type) != "file" {
-      error input "Is not a file" --metadata (metadata $file_path)
+      error input "Is not a file" --metadata (metadata $files)
     }
   }
 
   let file_metadatas = (
-    $files | par-each -k {|file|
-      $file
-      | path relative-to $env.PWD
-      get-and-check-paths $in ".avif" --rm-ext --force=$force -m (metadata $in)
-    }
+    get-and-check-paths $files ".avif" --rm-ext --force=$force -m (metadata $files)
   )
   if ($file_metadatas | is-empty) { return }
 
@@ -44,7 +40,6 @@ export def av1 [
   let quality = quality av1 $quality
   let effort = effort av1 $effort
   let threads = get-threads $threads
-  let force = if $force { "-y" } else { "" }
 
   do {
     cd $file_metadatas.0.active_dir
@@ -52,10 +47,7 @@ export def av1 [
 
     $file_metadatas | each {|paths|
       let flags: list<string> = []
-      | add-flag "-v" "error"
-      | add-flag "-y" $force
-      | add-flag "-threads" $threads
-      | add-flag "-i" $paths.input_name
+      | ffmpeg-flags --force=$force --threads=$threads --input=$paths.input_name
       | add-flag "-c:v" "libsvtav1"
       | add-flag "-svtav1-params" "avif=1"
       | add-flag "-preset" $effort
@@ -105,25 +97,17 @@ export def webp [
   let files = glob $files
   for file_path in $files {
     if ($file_path | path type) != "file" {
-      error input "Is not a file" --metadata (metadata $file_path)
+      error input "Is not a file" --metadata (metadata $files)
     }
   }
 
   let file_metadatas = (
-    $files | par-each -k {|file|
-      $file
-      | path relative-to $env.PWD
-      get-and-check-paths $in ".webp" --rm-ext --force=$force -m (metadata $in)
-    }
+    get-and-check-paths $files ".webp" --rm-ext --force=$force -m (metadata $files)
   )
   if ($file_metadatas | is-empty) { return }
 
   # options
-  let quality = if $quality == null and not $lossless {
-    quality webp "better"
-  } else {
-    quality webp $quality
-  }
+  let quality = quality webp $quality --lossless=$lossless
   let effort = effort webp $effort
   let threads = get-threads $threads
 
@@ -132,10 +116,7 @@ export def webp [
 
     $file_metadatas | each {|paths|
       mut flags: list<string> = []
-      | add-flag "-v" "error"
-      | add-flag "-y" $force
-      | add-flag "-threads" $threads
-      | add-flag "-i" $paths.input_name
+      | ffmpeg-flags --force=$force --threads=$threads --input=$paths.input_name
       | add-flag "-c:v" "libwebp"
       | add-flag "-compression_level" $effort
 

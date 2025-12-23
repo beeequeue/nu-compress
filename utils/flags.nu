@@ -13,3 +13,17 @@ export def add-flag [
     }
   )
 }
+
+export def ffmpeg-flags [
+  --force(-f)
+  --verbose(-v): string = "error"
+  --threads(-t): oneof<int, nothing>
+  --input(-i): path
+]: list<string> -> list<string> {
+  $in
+  | add-flag "-hide_banner" true
+  | add-flag "-v" $verbose
+  | add-flag "-y" $force
+  | add-flag "-threads" $threads
+  | add-flag "-i" $input
+}

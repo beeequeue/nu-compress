@@ -22,15 +22,16 @@ export def "quality webp" [
   --average: int = $webp_quality.average
   --better: int = $webp_quality.better
   --best: int = $webp_quality.best
+  --lossless
   input: oneof<string, nothing>
-]: nothing -> int {
+]: nothing -> oneof<int, nothing> {
   match $input {
     "smallest" => $smallest
     "small" => $small
     "average" => $average
     "better" => $better
     "best" => $best
-    null => $better
+    null => (if not $lossless { return $better })
     _ => (
       error make {
         msg: $"Invalid webp compression quality: ($input)."

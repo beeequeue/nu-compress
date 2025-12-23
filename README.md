@@ -67,7 +67,8 @@ compress dir bz3 --help
   - [x] quality (`--level`) -> `--quality`
   - [x] add `--lossless` to where valid
     - [x] webp
-  - [ ] make every command accept multiple files
+  - [x] make every command accept multiple files
+  - [ ] add `--silent`
 - [ ] more commands
   - [ ] files/dirs
     - [x] zstd

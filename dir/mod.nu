@@ -19,18 +19,20 @@ export def zst [
   --threads(-t): int@"nu-complete thread-count"
   # zstd compression threads.
   # Defaults to 75% of available threads
-  directory: path
+  globs: glob
   # Path of directory to compress.
-]: nothing -> path {
-  if ($directory | path type) != "dir" {
-    error input "Is not a directory" --metadata (metadata $directory)
+]: nothing -> nothing {
+  let paths = glob $globs
+  for file_path in $paths {
+    if ($file_path | path type) != "dir" {
+      error input "Is not a directory" --metadata (metadata $paths)
+    }
   }
 
-  let paths = if $force {
-    get-and-check-paths $directory ".tar.zst" -f -m (metadata $directory)
-  } else {
-    get-and-check-paths $directory ".tar.zst" -m (metadata $directory)
-  }
+  let metadatas = (
+    get-and-check-paths $paths ".tar.zst" --rm-ext --force=$force -m (metadata $paths)
+  )
+  if ($metadatas | is-empty) { return }
 
   # options
   let effort = effort zstd $effort
@@ -38,18 +40,17 @@ export def zst [
   let threads = get-threads $threads
 
   do {
-    cd $paths.active_dir
+    cd $metadatas.0.active_dir
 
-    $env.ZSTD_CLEVEL = $effort
-    $env.ZSTD_NBTHREADS = $threads
-    tar -I zstd -cf $paths.output_name $paths.input_name
+    $metadatas | each {|paths|
+      $env.ZSTD_CLEVEL = $effort
+      $env.ZSTD_NBTHREADS = $threads
+      tar -I zstd -cf $paths.output_name $paths.input_name
+
+      let diff = diff paths $paths.input_name $paths.output_path
+      print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute)) | ($paths.output_name)"
+    }
   }
-
-  let diff = diff paths $directory $paths.output_path
-
-  print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute))"
-
-  return $paths.output_path
 }
 
 # Compress a directory to a tar archive with zstd.
@@ -62,36 +63,34 @@ export def bz3 [
   --threads(-t): int@"nu-complete thread-count"
   # bzip3 compression threads.
   # Defaults to 75% of available threads
-  directory: path
+  globs: glob
   # Path of directory to compress.
 ]: nothing -> path {
-  if ($directory | path type) != "dir" {
-    error input "Is not a directory" --metadata (metadata $directory)
+  let paths = glob $globs
+  for file_path in $paths {
+    if ($file_path | path type) != "dir" {
+      error input "Is not a directory" --metadata (metadata $paths)
+    }
   }
 
-  let paths = if $force {
-    get-and-check-paths $directory ".tar.bz3" -f -m (metadata $directory)
-  } else {
-    get-and-check-paths $directory ".tar.bz3" -m (metadata $directory)
-  }
+  let metadatas = (
+    get-and-check-paths $paths ".tar.bz3" --rm-ext --force=$force -m (metadata $paths)
+  )
+  if ($metadatas | is-empty) { return }
 
   # options
   let threads = get-threads $threads
 
-  let active_dir = ($directory | path dirname | path expand)
   do {
-    cd $active_dir
+    cd $metadatas.0.active_dir
 
-    # let bz3_cmd = $"bzip3 -z --jobs=($threads)"
-    tar -I bzip3 -cf $paths.output_name $paths.input_name
+    $metadatas | each {|paths|
+      tar -I bzip3 -cf $paths.output_name $paths.input_name
+
+      let diff = diff paths $paths.input_name $paths.output_path
+      print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute)) | ($paths.output_name)"
+    }
   }
-
-  let diff = diff paths $directory $paths.output_path
-
-  # TODO: add --silent flag
-  print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute))"
-
-  return $paths.output_path
 }
 
 

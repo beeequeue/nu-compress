@@ -30,16 +30,12 @@ export def av1 [
   let files = glob $files
   for file_path in $files {
     if ($file_path | path type) != "file" {
-      error input "Is not a file" --metadata (metadata $file_path)
+      error input "Is not a file" --metadata (metadata $files)
     }
   }
 
   let file_metadatas = (
-    $files | par-each -k {|file|
-      $file
-      | path relative-to $env.PWD
-      get-and-check-paths $in $".($container)" --rm-ext --force=$force -m (metadata $in)
-    }
+    get-and-check-paths $files $".($container)" --rm-ext --force=$force -m (metadata $files)
   )
   if ($file_metadatas | is-empty) { return }
 
@@ -47,7 +43,6 @@ export def av1 [
   let quality = quality av1 $quality
   let effort = effort av1 $effort
   let threads = get-threads $threads
-  let force = if $force { "-y" } else { "" }
 
   do {
     cd $file_metadatas.0.active_dir
@@ -55,11 +50,7 @@ export def av1 [
 
     $file_metadatas | each {|paths|
       let flags: list<string> = []
-      | add-flag "-hide_banner" true
-      | add-flag "-v" "info"
-      | add-flag "-y" $force
-      | add-flag "-threads" $threads
-      | add-flag "-i" $paths.input_name
+      | ffmpeg-flags -v=info --force=$force --threads=$threads --input=$paths.input_name
       | add-flag "-c:v" "libsvtav1"
       | add-flag "-preset" $effort
       | add-flag "-crf" $quality

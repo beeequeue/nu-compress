@@ -6,32 +6,34 @@ export def filename [input: path]: nothing -> path {
 }
 
 export def get-and-check-paths [
-  path: path
+  paths: list<path>
   suffix: string
   --rm-ext
   --metadata(-m): record<span: any>
   --force(-f)
   # Overwrite existing output file if it exists.
-] {
-  let input_name = $path | path basename
-  let output_name = if $rm_ext {
-    $input_name | (filename $in) + $suffix
-  } else {
-    $input_name + $suffix
-  }
-  let active_dir = $path | path dirname
-  let output_path = $active_dir | path join $output_name
+]: nothing -> list<record> {
+  return ($paths | par-each -k {|path|
+    let input_name = $path | path basename
+    let output_name = if $rm_ext {
+      $input_name | (filename $in) + $suffix
+    } else {
+      $input_name + $suffix
+    }
+    let active_dir = $path | path dirname
+    let output_path = $active_dir | path join $output_name
 
-  if not $force and ($output_path | path exists) {
-    error input $"Output file already exists \(($output_name))" --hm "Use -f to overwrite" --metadata $metadata
-  }
+    if not $force and ($output_path | path exists) {
+      error input $"Output file already exists \(($output_name))" --hm "Use -f to overwrite" --metadata $metadata
+    }
 
-  return {
-    input_name: $input_name,
-    output_name: $output_name,
-    active_dir: $active_dir,
-    output_path: $output_path,
-  }
+    return {
+      input_name: $input_name,
+      output_name: $output_name,
+      active_dir: $active_dir,
+      output_path: $output_path,
+    }
+  })
 }
 
 export def "nu-complete thread-count" [--min: int, --max: int] {
