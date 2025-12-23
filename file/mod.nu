@@ -36,16 +36,18 @@ export def zst [
 
   # options
   let effort = effort zstd $effort
-  #let actual_long = if $long != null { "--long" } else { "" }
   let threads = get-threads $threads
 
   do {
     cd $file_metadatas.0.active_dir
 
     $file_metadatas | each {|paths|
-      $env.ZSTD_CLEVEL = $effort
-      $env.ZSTD_NBTHREADS = $threads
-      zstd --force --quiet $paths.input_name -o $paths.output_name
+      let flags = []
+      | add-flag "--force" $force
+      | add-flag $"-T($threads)" true
+      | add-flag $"-($effort)" true
+      | add-flag "--long" $long
+      zstd ...$flags $paths.input_name -o $paths.output_name
 
       let diff = diff paths $paths.input_name $paths.output_path
       print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute)) | ($paths.output_name)"
@@ -62,6 +64,8 @@ export def bz3 [
   --threads(-t): int@"nu-complete thread-count"
   # bzip3 compression threads.
   # Defaults to 75% of available threads
+  --block(-b): int
+  # Block size in MB. Defaults to 16.
   files: glob
   # Path of file to compress.
 ]: nothing -> nothing {
@@ -83,8 +87,11 @@ export def bz3 [
     cd $file_metadatas.0.active_dir
 
     $file_metadatas | each {|paths|
-      # TODO: why is this running tar??
-      tar -I bzip3 -cf $paths.output_name $paths.input_name
+      let flags = []
+      | add-flag "--force" $force
+      | add-flag "--jobs" $threads
+      | add-flag "--block" $block
+      bzip3 ...$flags $paths.input_name
 
       let diff = diff paths $paths.input_name $paths.output_path
       print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute)) | ($paths.output_name)"
