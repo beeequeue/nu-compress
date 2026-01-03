@@ -1,4 +1,5 @@
 use ../utils/error.nu *
+use ../utils/flags.nu *
 use ../utils/input.nu *
 use ../utils/size.nu *
 use ../utils/zstd.nu *
