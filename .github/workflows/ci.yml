@@ -1,0 +1,45 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        with:
+          persist-credentials: false
+
+      - name: set up nushell
+        uses: hustcer/setup-nu@920172d92eb04671776f3ba69d605d3b09351c30 # v3.22
+        with:
+          version: "0.109"
+
+      - shell: nu {0}
+        run: |
+          ls **/*.nu
+          | where name != "mod.nu"
+          | par-each { |it|
+            let path = $it.name
+            nu --ide-check 100 $path
+            | from json --objects
+            | where type != hint
+            | if ($in | is-not-empty) {
+              print $"Errors in ($path):";
+              print $in;
+              print "\n";
+              exit 1;
+            }
+          }
