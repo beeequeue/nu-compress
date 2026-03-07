@@ -22,6 +22,8 @@ export def av1 [
   --container(-c): string@"nu-complete video container" = "mkv"
   # Container to store the audiovisual data in.
   # Defaults to mkv.
+  --framerate(-r): int
+  # Set the output framerate per second.
   --height(-y): int
   # Resize video to specified height. Maintains aspect ratio if --width is not specified.
   --width(-x): int
@@ -64,6 +66,7 @@ export def av1 [
       | add-flag "-pix_fmt" "yuv420p10le"
       | add-flag "-preset" $effort
       | add-flag "-crf" $quality
+      | add-flag "-r" $framerate
       | add-flag "-vf" (do {
           if $width == null and $height == null { return false }
 
@@ -72,6 +75,7 @@ export def av1 [
           $"scale=($width):($height)"
         })
 
+      print ...$flags
       null | ffmpeg ...$flags (if $output != null { $output } else { $paths.output_name })
 
       let diff = diff paths $paths.input_name $paths.output_path
