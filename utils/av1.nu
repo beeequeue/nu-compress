@@ -1,9 +1,9 @@
 export const av1_quality = {
-  smallest: 40,
+  smallest: 45,
   small: 30,
-  average: 20,
-  better: 15,
-  best: 8,
+  average: 24,
+  better: 18,
+  best: 10,
 }
 
 export def "nu-complete quality av1" [] {
