@@ -1,5 +1,6 @@
 use ../utils/av1.nu *
 use ../utils/error.nu *
+use ../utils/flags.nu *
 use ../utils/input.nu *
 use ../utils/size.nu *
 use ../utils/video.nu *
@@ -21,9 +22,15 @@ export def av1 [
   --container(-c): string@"nu-complete video container" = "mkv"
   # Container to store the audiovisual data in.
   # Defaults to mkv.
+  --height(-y): int
+  # Resize video to specified height. Maintains aspect ratio if --width is not specified.
+  --width(-x): int
+  # Resize video to specified width. Maintains aspect ratio if --height is not specified.
   --threads(-t): int@"nu-complete thread-count"
   # ffmpeg threads.
   # Defaults to 75% of available threads
+  --output(-o): path
+  # Path of output file or directory.
   files: glob
   # Path of file to compress.
 ]: nothing -> nothing {
@@ -50,12 +57,22 @@ export def av1 [
 
     $file_metadatas | each {|paths|
       let flags: list<string> = []
-      | ffmpeg-flags -v=info --force=$force --threads=$threads --input=$paths.input_name
+      | ffmpeg-flags --force=$force --threads $threads --input $paths.input_name
+      | add-flag "-stats" true
+      | add-flag "-c:a" "copy"
       | add-flag "-c:v" "libsvtav1"
+      | add-flag "-pix_fmt" "yuv420p10le"
       | add-flag "-preset" $effort
       | add-flag "-crf" $quality
+      | add-flag "-vf" (do {
+          if $width == null and $height == null { return false }
 
-      null | ffmpeg ...$flags $paths.output_name
+          let width = if $width != null { $width | into string } else { "-2" }
+          let height = if $height != null { $height | into string } else { "-2" }
+          $"scale=($width):($height)"
+        })
+
+      null | ffmpeg ...$flags (if $output != null { $output } else { $paths.output_name })
 
       let diff = diff paths $paths.input_name $paths.output_path
       print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute)) | ($paths.output_name)"
