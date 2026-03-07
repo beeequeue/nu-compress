@@ -50,6 +50,7 @@ export def av1 [
       | ffmpeg-flags --force=$force --threads=$threads --input=$paths.input_name
       | add-flag "-c:v" "libsvtav1"
       | add-flag "-svtav1-params" "avif=1"
+      | add-flag "-pix_fmt" "yuv420p10le"
       | add-flag "-preset" $effort
       | add-flag "-crf" $quality
 
