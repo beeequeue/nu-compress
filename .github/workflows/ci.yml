@@ -25,7 +25,7 @@ jobs:
       - name: set up nushell
         uses: hustcer/setup-nu@920172d92eb04671776f3ba69d605d3b09351c30 # v3.22
         with:
-          version: "0.109"
+          version: "0.111"
 
       - shell: nu {0}
         run: |
