@@ -28,6 +28,8 @@ export def av1 [
   # Resize video to specified height. Maintains aspect ratio if --width is not specified.
   --width(-x): int
   # Resize video to specified width. Maintains aspect ratio if --height is not specified.
+  --denoise: float
+  # Denoise video with specified strength. Defaults to no denoising. Default denoising strength would be 6.0.
   --threads(-t): int@"nu-complete thread-count"
   # ffmpeg threads.
   # Defaults to 75% of available threads
@@ -61,12 +63,14 @@ export def av1 [
       let flags: list<string> = []
       | ffmpeg-flags --force=$force --threads $threads --input $paths.input_name
       | add-flag "-stats" true
+      | add-flag "-map_metadata" "0"
       | add-flag "-c:a" "copy"
       | add-flag "-c:v" "libsvtav1"
       | add-flag "-pix_fmt" "yuv420p10le"
       | add-flag "-preset" $effort
       | add-flag "-crf" $quality
       | add-flag "-r" $framerate
+      | add-flag "-vf" (if $denoise != null { $"hqdn3d=luma_spatial=($denoise)" } else { false })
       | add-flag "-vf" (do {
           if $width == null and $height == null { return false }
 
