@@ -6,7 +6,7 @@ export def add-flag [
   | append (
     if $input == true {
       [$flag]
-    } else if $input == false {
+    } else if $input == false or $input == null {
       []
     } else {
       [$flag ($input | into string)]
