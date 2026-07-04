@@ -48,6 +48,7 @@ export def av1 [
     $file_metadatas | each {|paths|
       let flags: list<string> = []
       | ffmpeg-flags --force=$force --threads=$threads --input=$paths.input_name
+      | add-flag "-map_metadata" "0"
       | add-flag "-c:v" "libsvtav1"
       | add-flag "-svtav1-params" "avif=1"
       | add-flag "-pix_fmt" "yuv420p10le"
@@ -118,6 +119,7 @@ export def webp [
     $file_metadatas | each {|paths|
       mut flags: list<string> = []
       | ffmpeg-flags --force=$force --threads=$threads --input=$paths.input_name
+      | add-flag "-map_metadata" "0"
       | add-flag "-c:v" "libwebp"
       | add-flag "-compression_level" $effort
 
