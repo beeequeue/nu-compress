@@ -10,8 +10,8 @@ export def "diff paths" [
   before: path
   after: path
 ] {
-  let before_size = ls -dt $before | math sum | get size
-  let after_size = ls -dt $after | math sum | get size
+  let before_size = ls -dt $before | get size | math sum
+  let after_size = ls -dt $after | get size | math sum
 
  return {
    before: $before_size
