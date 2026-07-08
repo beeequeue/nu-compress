@@ -14,7 +14,7 @@ export def av1 [
   --force(-f)
   # Overwrite existing output file if it exists.
   --quality(-q): string@"nu-complete quality av1" = "average"
-  # av1 quality: smallest (40), small (30), average (20), better (15), best (8).
+  # av1 quality: tiny (60), smaller (45), small (35), average (28), better (20), best (12).
   # Defaults to average.
   --effort(-e): string@"nu-complete effort av1" = "max"
   # av1 speed effort: veryfast (10), fast (8), normal (4), slow (2), max(1).

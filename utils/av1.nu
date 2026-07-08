@@ -1,9 +1,10 @@
 export const av1_quality = {
-  smallest: 45,
-  small: 30,
-  average: 24,
-  better: 18,
-  best: 10,
+  tiny: 60,
+  smaller: 45,
+  small: 35,
+  average: 28,
+  better: 20,
+  best: 12,
 }
 
 export def "nu-complete quality av1" [] {
@@ -17,7 +18,8 @@ export def "nu-complete quality av1" [] {
 }
 
 export def "quality av1" [
-  --smallest: int = $av1_quality.smallest
+  --tiny: int = $av1_quality.tiny
+  --smaller: int = $av1_quality.smaller
   --small: int = $av1_quality.small
   --average: int = $av1_quality.average
   --better: int = $av1_quality.better
@@ -25,7 +27,8 @@ export def "quality av1" [
   input: string
 ]: nothing -> int {
   match $input {
-    "smallest" => $smallest
+    "tiny" => $tiny
+    "smaller" => $smaller
     "small" => $small
     "average" => $average
     "better" => $better
