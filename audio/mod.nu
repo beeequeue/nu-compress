@@ -13,16 +13,19 @@ export def ogg [
   # audio quality: tiny (22kHz/128kbps), average (44kHz/256kbps), better (48kHz/320kbps), best (192kHz/512kbps).
   --threads(-t): int@"nu-complete thread-count"
   # ffmpeg threads. Defaults to 75% of available threads
+  --output(-o): path
+  # Path of output file or directory.
   files: glob
   # Path of file to compress.
 ]: nothing -> nothing {
   return (
-    compress-audio 
-      "libvorbis" 
+    compress-audio
+      "libvorbis"
       ".ogg"
         --force=$force
         --quality=$quality
         --threads=$threads
+        --output=$output
         $files
   )
 }
@@ -35,16 +38,19 @@ export def opus [
   # audio quality: tiny (22kHz/128kbps), average (44kHz/256kbps), better (48kHz/320kbps), best (192kHz/512kbps).
   --threads(-t): int@"nu-complete thread-count"
   # ffmpeg threads. Defaults to 75% of available threads
+  --output(-o): path
+  # Path of output file or directory.
   files: glob
   # Path of file to compress.
 ]: nothing -> nothing {
   return (
-    compress-audio 
-      "libopus" 
+    compress-audio
+      "libopus"
       ".opus"
         --force=$force
         --quality=$quality
         --threads=$threads
+        --output=$output
         $files
   )
 }
@@ -57,6 +63,8 @@ def compress-audio [
   # audio quality: tiny (22kHz/128kbps), average (44kHz/256kbps), better (48kHz/320kbps), best (192kHz/512kbps).
   --threads(-t): int@"nu-complete thread-count"
   # ffmpeg threads. Defaults to 75% of available threads
+  --output(-o): path
+  # Path of output file or directory.
   files: glob
   # Path of file to compress.
 ]: nothing -> nothing {
@@ -68,7 +76,7 @@ def compress-audio [
   }
 
   let file_metadatas = (
-    get-and-check-paths $files $extension --rm-ext --force=$force -m (metadata $files)
+    get-and-check-paths $files $extension $output --rm-ext --force=$force -m (metadata $files)
   )
   if ($file_metadatas | is-empty) { return }
 

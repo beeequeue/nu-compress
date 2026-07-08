@@ -21,6 +21,8 @@ export def av1 [
   --threads(-t): int@"nu-complete thread-count"
   # ffmpeg threads.
   # Defaults to 75% of available threads
+  --output(-o): path
+  # Path of output file or directory.
   files: glob
   # Path of file to compress.
 ]: nothing -> nothing {
@@ -32,7 +34,7 @@ export def av1 [
   }
 
   let file_metadatas = (
-    get-and-check-paths $files ".avif" --rm-ext --force=$force -m (metadata $files)
+    get-and-check-paths $files ".avif" $output --rm-ext --force=$force -m (metadata $files)
   )
   if ($file_metadatas | is-empty) { return }
 
@@ -83,6 +85,8 @@ export def webp [
   --threads(-t): int@"nu-complete thread-count"
   # ffmpeg threads.
   # Defaults to 75% of available threads
+  --output(-o): path
+  # Path of output file or directory.
   files: glob
   # Path of file to compress.
 ]: nothing -> nothing {
@@ -104,7 +108,7 @@ export def webp [
   }
 
   let file_metadatas = (
-    get-and-check-paths $files ".webp" --rm-ext --force=$force -m (metadata $files)
+    get-and-check-paths $files ".webp" $output --rm-ext --force=$force -m (metadata $files)
   )
   if ($file_metadatas | is-empty) { return }
 

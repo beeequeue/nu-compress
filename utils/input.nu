@@ -8,6 +8,7 @@ export def filename [input: path]: nothing -> path {
 export def get-and-check-paths [
   paths: list<path>
   suffix: string
+  output: oneof<path, nothing>
   --rm-ext
   --metadata(-m): record<span: any>
   --force(-f)
@@ -15,7 +16,9 @@ export def get-and-check-paths [
 ]: nothing -> list<record> {
   return ($paths | par-each -k {|path|
     let input_name = $path | path basename
-    let output_name = if $rm_ext {
+    let output_name = if $output != null {
+      $output
+    } else if $rm_ext {
       $input_name | (filename $in) + $suffix
     } else {
       $input_name + $suffix

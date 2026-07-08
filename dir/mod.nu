@@ -30,7 +30,7 @@ export def zst [
   }
 
   let metadatas = (
-    get-and-check-paths $paths ".tar.zst" --rm-ext --force=$force -m (metadata $paths)
+    get-and-check-paths $paths ".tar.zst" null --rm-ext --force=$force -m (metadata $paths)
   )
   if ($metadatas | is-empty) { return }
 
@@ -74,7 +74,7 @@ export def bz3 [
   }
 
   let metadatas = (
-    get-and-check-paths $paths ".tar.bz3" --rm-ext --force=$force -m (metadata $paths)
+    get-and-check-paths $paths ".tar.bz3" null --rm-ext --force=$force -m (metadata $paths)
   )
   if ($metadatas | is-empty) { return }
 

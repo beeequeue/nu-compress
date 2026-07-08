@@ -31,7 +31,7 @@ export def zst [
   }
 
   let file_metadatas = (
-    get-and-check-paths $files ".zst" --rm-ext --force=$force -m (metadata $files)
+    get-and-check-paths $files ".zst" null --rm-ext --force=$force -m (metadata $files)
   )
   if ($file_metadatas | is-empty) { return }
 
@@ -78,7 +78,7 @@ export def bz3 [
   }
 
   let file_metadatas = (
-    get-and-check-paths $files ".bz3" --rm-ext --force=$force -m (metadata $files)
+    get-and-check-paths $files ".bz3" null --rm-ext --force=$force -m (metadata $files)
   )
   if ($file_metadatas | is-empty) { return }
 

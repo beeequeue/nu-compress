@@ -46,7 +46,7 @@ export def av1 [
   }
 
   let file_metadatas = (
-    get-and-check-paths $files $".($container)" --rm-ext --force=$force -m (metadata $files)
+    get-and-check-paths $files $".($container)" $output --rm-ext --force=$force -m (metadata $files)
   )
   if ($file_metadatas | is-empty) { return }
 
@@ -80,7 +80,7 @@ export def av1 [
         })
 
       print ...$flags
-      null | ffmpeg ...$flags (if $output != null { $output } else { $paths.output_name })
+      null | ffmpeg ...$flags $paths.output_name
 
       let diff = diff paths $paths.input_name $paths.output_path
       print $"($diff.before) -> ($diff.after) \(($diff.percent) ($diff.absolute)) | ($paths.output_name)"
