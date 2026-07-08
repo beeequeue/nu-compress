@@ -64,7 +64,7 @@ export def av1 [
       | ffmpeg-flags --force=$force --threads $threads --input $paths.input_name
       | add-flag "-stats" true
       | add-flag "-map_metadata" "0"
-      | add-flag "-c:a" "copy"
+      | add-flag "-c:a" "libopus"
       | add-flag "-c:v" "libsvtav1"
       | add-flag "-pix_fmt" "yuv420p10le"
       | add-flag "-preset" $effort
