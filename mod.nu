@@ -7,4 +7,5 @@ export module compress/video
 export use compress/audio;
 export use compress/dir;
 export use compress/file;
+export use compress/image;
 export use compress/video;
